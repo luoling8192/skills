@@ -19,6 +19,7 @@ jobs:
           test "$expected" -eq "$listed"
 
   check:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
