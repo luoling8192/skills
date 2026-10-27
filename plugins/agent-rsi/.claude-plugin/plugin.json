@@ -1,0 +1,10 @@
+{
+  "name": "agent-rsi",
+  "version": "0.1.0",
+  "description": "Agent retrospective loop: records mistakes and proven methods, and promotes anything seen twice into AGENTS.md. Includes a Stop hook that asks for a retrospective after real work.",
+  "author": {
+    "name": "RainbowBird",
+    "url": "https://github.com/luoling8192"
+  },
+  "license": "MIT"
+}

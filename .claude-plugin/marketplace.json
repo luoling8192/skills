@@ -1,0 +1,14 @@
+{
+  "name": "luoling8192-skills",
+  "owner": {
+    "name": "RainbowBird",
+    "url": "https://github.com/luoling8192"
+  },
+  "plugins": [
+    {
+      "name": "agent-rsi",
+      "source": "./plugins/agent-rsi",
+      "description": "Agent retrospective loop with a Stop hook: records mistakes and proven methods, and promotes anything seen twice into AGENTS.md."
+    }
+  ]
+}

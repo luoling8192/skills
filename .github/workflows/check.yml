@@ -1,0 +1,34 @@
+name: Check synced skills
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: The skills CLI finds every SKILL.md
+        # A SKILL.md with invalid frontmatter is skipped silently, so compare counts.
+        run: |
+          expected=$(find skills plugins -name SKILL.md | wc -l)
+          listed=$(npx -y skills@1.7.4 add . --list 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | grep -cE '^\|    [a-z0-9-]+$')
+          echo "SKILL.md files: $expected, listed: $listed"
+          test "$expected" -eq "$listed"
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Synced skills are not edited by hand
+        run: |
+          changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- skills/)
+          if [ -n "$changed" ]; then
+            echo "These files are synced from source repositories (see sources.json); change them there:"
+            echo "$changed"
+            exit 1
+          fi

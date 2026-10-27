@@ -1,0 +1,27 @@
+[
+  {
+    "repo": "luoling8192/software-design-philosophy-skill",
+    "path": ".",
+    "dest": "skills/software-design-philosophy"
+  },
+  {
+    "repo": "luoling8192/technical-writing",
+    "path": ".",
+    "dest": "skills/technical-writing"
+  },
+  {
+    "repo": "luoling8192/ai-coding-principles",
+    "path": "ai-coding-discipline",
+    "dest": "skills/ai-coding-discipline"
+  },
+  {
+    "repo": "luoling8192/ai-coding-principles",
+    "path": "ddia-principles",
+    "dest": "skills/ddia-principles"
+  },
+  {
+    "repo": "luoling8192/create-pr-with-evidence-skill",
+    "path": ".",
+    "dest": "skills/create-pr-with-evidence"
+  }
+]
