@@ -14,7 +14,9 @@ jobs:
         # A SKILL.md with invalid frontmatter is skipped silently, so compare counts.
         run: |
           expected=$(find skills plugins -name SKILL.md | wc -l)
-          listed=$(npx -y skills@1.7.4 add . --list 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | grep -cE '^\|    [a-z0-9-]+$')
+          output=$(npx -y skills@1.7.4 add . --list 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
+          echo "$output"
+          listed=$(echo "$output" | sed -nE 's/.*Found ([0-9]+) skills?.*/\1/p' | head -1)
           echo "SKILL.md files: $expected, listed: $listed"
           test "$expected" -eq "$listed"
 
