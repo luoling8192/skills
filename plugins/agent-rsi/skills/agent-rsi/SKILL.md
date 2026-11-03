@@ -23,7 +23,7 @@ The **workspace** is the directory the session started in: the one holding the t
 | Counter | `agent-docs/ledger.md` | Every failure, and every proven method |
 | Rule | See "Rule scope" below | Ledger count reaches 2, or a method proved itself twice |
 
-Templates are in `templates/` next to this file. Repo files (tests, ADRs, repo postmortems, repo `AGENTS.md`) go through the task's branch and a PR, never a repo's main checkout.
+Templates are in `templates/` next to this file. `scripts/session-stats.py` measures where session time went (see step 1). Repo files (tests, ADRs, repo postmortems, repo `AGENTS.md`) go through the task's branch and a PR, never a repo's main checkout.
 
 ### Rule scope
 
@@ -39,7 +39,23 @@ Start at the narrowest scope. Move a rule up one scope when the same lesson show
 
 ### 1. Classify the outcome (always)
 
-Answer in two or three lines, for yourself:
+First measure the session. Do not rely on memory for what was slow:
+
+```sh
+python3 -I <this skill>/scripts/session-stats.py --transcript <current transcript>
+```
+
+Claude Code transcripts are `~/.claude/projects/<cwd with / as ->/<session id>.jsonl`. Codex transcripts are under `~/.codex/sessions/`. With no `--transcript`, the script reads every transcript; add `--since 1d` to limit it.
+
+The script pairs each tool call with its result and prints findings: command families that take a large share of time, calls that are never fast, slow calls, repeated commands, failures, polling loops, and denied calls. Treat each finding as a candidate `slow` or `mistake` row for step 2. A finding is evidence, not a root cause. Read the command and its output before you name a cause.
+
+Limits of the numbers:
+
+- Times include permission checks and user approval.
+- Background calls and calls sent in one parallel batch have no time of their own.
+- The report shows command text. Copy conclusions into the ledger, never raw commands, hosts, or paths.
+
+Then answer in two or three lines, for yourself:
 
 - What was the task, and did it succeed on the first try?
 - What went wrong, or took longer than it should? Count user corrections, failed CI runs, review rounds, reverted commits, wrong assumptions.
@@ -53,6 +69,8 @@ Re-read `agent-docs/ledger.md` right before you edit it; other sessions write to
 
 - Match: increment `Count`, update `Last seen`, append the new evidence.
 - No match: add a row with `Count` 1 and the next free ID (`L-NNNN`).
+
+Log a time sink found in step 1 with type `slow`, for example "each remote exec pays 10 s of connection setup". Put the measured numbers in `Evidence`.
 
 Also log successes that saved real time ("ran the tests locally before pushing and skipped a CI round trip") with type `method`. Methods are promoted the same way as mistakes.
 
@@ -69,7 +87,7 @@ Produce only what the failure warrants:
 
 Promote when either holds:
 
-- A `mistake` row reaches `Count` ≥ 2.
+- A `mistake` or `slow` row reaches `Count` ≥ 2.
 - A `method` row has saved time at least twice, or the user stated it as a standing rule.
 
 How to write the rule:
@@ -81,6 +99,15 @@ How to write the rule:
 - Set the ledger row's `Status` to `promoted → <file>#<section>`.
 
 Rule files load into every session, so keep each one under about 150 lines. Before adding to a file at that size, merge overlapping rules and delete rules whose subject no longer exists.
+
+### Sweep across sessions
+
+A cost that is small in each session can be large in total. Run a sweep on a schedule, for example weekly, or when the user asks:
+
+1. Run `session-stats.py --since 7d`. Add `--json` to read the numbers in a script.
+2. For each finding, look for a ledger row with the same root cause. On a match, increment `Count` once per sweep, not once per session. Otherwise add a row.
+3. A sweep runs without the user. It does not edit rule files. For each row that reaches the promotion threshold, write the proposed rule and set `Status` to `proposed → <file>#<section>`. Put the change in a pull request where the rule file is in a repository; otherwise list it for the user.
+4. Report the top findings, the ledger changes, and the proposals in one short message.
 
 ### 5. Report
 
