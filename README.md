@@ -57,7 +57,7 @@ For agents without hooks, add a line to your global rules file (`~/AGENTS.md`, `
 ## How agent-rsi works
 
 1. After a task, the agent runs `scripts/session-stats.py` on the session transcript (Claude Code or Codex). The script reports where tool time went: slow command families, calls that are never fast, repeated commands, failures, and polling loops. Then the agent finds the root cause of anything that went wrong or took too long.
-2. It logs the root cause in `agent-docs/ledger.md` at the workspace root. A repeat of the same root cause increments the existing row's count instead of adding a new row.
+2. It logs the root cause in `agent-docs/ledger.md` at the workspace root, or in `~/agent-docs/` when every project on the machine needs the lesson. A lesson never lives only in one directory's agent memory. A repeat of the same root cause increments the existing row's count instead of adding a new row.
 3. A failure produces a regression test and, where warranted, an ADR, a postmortem, or a shared lesson in `agent-docs/lessons/`.
 4. When a count reaches 2, the lesson becomes a rule in the narrowest `AGENTS.md` that covers it: a repository's, a workspace's, or your global `~/AGENTS.md`.
 5. A scheduled sweep runs the script over the last 7 days of sessions, so it also finds costs that are small in each session. A sweep only proposes rules. A person reviews them before they reach a rule file.

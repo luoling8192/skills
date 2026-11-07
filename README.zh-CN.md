@@ -57,7 +57,7 @@ hook 需要 `python3`。同一段新工作只会提醒一次。只读的轮次�
 ## agent-rsi 怎么工作
 
 1. 任务结束后，agent 对 session 记录（Claude Code 或 Codex）运行 `scripts/session-stats.py`。脚本统计工具时间花在哪里：慢的命令类别、每次都慢的调用、重复执行的命令、失败和轮询循环。然后 agent 找出出错或太慢的根因。
-2. 根因记进工作区根目录的 `agent-docs/ledger.md`。同一根因再次出现时，给原来那行加次数，不新增一行。
+2. 根因记进工作区根目录的 `agent-docs/ledger.md`；如果这台机器上的所有项目都需要这条经验，就记进 `~/agent-docs/`。经验不能只存在某个目录的 agent memory 里。同一根因再次出现时，给原来那行加次数，不新增一行。
 3. 出错会生成回归测试，需要时再写 ADR、postmortem，或者在 `agent-docs/lessons/` 里写共享经验。
 4. 次数到 2 时，写成规则，放进覆盖范围最小的那个 `AGENTS.md`：仓库级、工作区级，或全局的 `~/AGENTS.md`。
 5. 定期扫描对最近 7 天的所有 session 运行这个脚本，单个 session 里不明显的开销也能被发现。扫描只提议规则，人审核后才写进规则文件。

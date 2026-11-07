@@ -1,6 +1,6 @@
 # agent-docs
 
-Shared experience for every agent working in this workspace. Maintained by the `agent-rsi` skill.
+Shared experience for every agent working in this workspace (or, for `~/agent-docs/`, on this machine). Maintained by the `agent-rsi` skill.
 
 Before you start a task, skim the index below and read any lesson whose topic matches the task.
 
