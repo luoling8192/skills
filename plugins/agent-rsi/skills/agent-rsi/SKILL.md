@@ -12,15 +12,29 @@ Keep it small. A retrospective that takes longer than the task is waste. For a c
 
 ## Where things go
 
-The **workspace** is the directory the session started in: the one holding the top-level `AGENTS.md` for this work. Its `agent-docs/` directory holds the ledger and shared lessons. If `agent-docs/` does not exist, create it from `templates/agent-docs-README.md` and `templates/ledger.md`.
+The **workspace** is the directory the session started in: the one holding the top-level `AGENTS.md` for this work. Its `agent-docs/` directory holds the ledger and shared lessons. The **machine** directory `~/agent-docs/` has the same layout and holds what every project on this host needs. If either directory does not exist when you need it, create it from `templates/agent-docs-README.md` and `templates/ledger.md`.
+
+### Lesson scope
+
+Store each lesson where every session that needs it will read it:
+
+| Lesson about | Location |
+| --- | --- |
+| One repository | That repository's docs or `AGENTS.md` |
+| One workspace (several repos) | `<workspace>/agent-docs/lessons/<topic>.md` |
+| Tools on this machine, a cluster or third-party service, or the user's preferences | `~/agent-docs/lessons/<topic>.md`, with a pointer in the global rules |
+
+- Do not store a lesson only in an agent's per-directory memory, such as Claude Code project memory. Sessions that start in another directory never see it.
+- Before you add to a workspace lesson, ask whether a session in another project needs it too. If it does, it belongs in `~/agent-docs/`.
+- When you find a lesson at too narrow a scope, move it, and leave a one-line pointer in the old file.
 
 | Artifact | Location | When |
 | --- | --- | --- |
 | Regression unit / integration test | The affected repo, next to the code, in the same PR as the fix | Every bug that reached a commit, review, CI, or production |
 | ADR | `<repo>/docs/adr/NNNN-<slug>.md` | A design choice that someone would later question or undo |
 | Postmortem | `<repo>/docs/postmortems/YYYY-MM-DD-<slug>.md` if repo-specific; `agent-docs/postmortems/` if cross-repo or about agent process | Failure that reached CI, a reviewer, the user, or production; or cost more than ~30 min |
-| Shared lesson | `agent-docs/lessons/<topic>.md` | Knowledge another agent in another repo of this workspace would also need |
-| Counter | `agent-docs/ledger.md` | Every failure, and every proven method |
+| Shared lesson | See "Lesson scope" | Knowledge another agent in another repo would also need |
+| Counter | `agent-docs/ledger.md` of the same scope as the lesson | Every failure, and every proven method |
 | Rule | See "Rule scope" below | Ledger count reaches 2, or a method proved itself twice |
 
 Templates are in `templates/` next to this file. `scripts/session-stats.py` measures where session time went (see step 1). Repo files (tests, ADRs, repo postmortems, repo `AGENTS.md`) go through the task's branch and a PR, never a repo's main checkout.
@@ -34,6 +48,8 @@ Templates are in `templates/` next to this file. `scripts/session-stats.py` meas
 | Every project you work on | Global rules: `~/AGENTS.md`, loaded through `~/.claude/CLAUDE.md` (`@~/AGENTS.md`) and `~/.codex/AGENTS.md` | "Work in a worktree; never edit the main checkout." |
 
 Start at the narrowest scope. Move a rule up one scope when the same lesson shows up in a second repository or workspace.
+
+Put rules in these `AGENTS.md` files, never in a skill. A skill loads only when its description matches the task, but a rule must be in context before the mistake happens. A rule can point to a lesson file for the details.
 
 ## Steps
 
