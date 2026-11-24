@@ -54,6 +54,12 @@ For agents without hooks, add a line to your global rules file (`~/AGENTS.md`, `
 - After any task that changed code, config, pull requests, or deployments, run the `agent-rsi` skill.
 ```
 
+With or without hooks, also add this line. Agents follow a stale rule file over the code in front of them in about 90% of conflicts; this sentence reverses that and makes the agent report the mismatch, which is how `agent-rsi` learns that a rule is out of date ([arXiv 2610.30571](https://arxiv.org/abs/2610.30571)):
+
+```markdown
+- When a repository's documentation and its existing code disagree, follow the conventions used in the existing code, and in your final reply point out each inconsistency you found between the documentation and the code.
+```
+
 ## How agent-rsi works
 
 1. After a task, the agent runs `scripts/session-stats.py` on the session transcript (Claude Code or Codex). The script reports where tool time went: slow command families, calls that are never fast, repeated commands, failures, and polling loops. Then the agent finds the root cause of anything that went wrong or took too long.
@@ -61,6 +67,7 @@ For agents without hooks, add a line to your global rules file (`~/AGENTS.md`, `
 3. A failure produces a regression test and, where warranted, an ADR, a postmortem, or a shared lesson in `agent-docs/lessons/`.
 4. When a count reaches 2, the lesson becomes a rule in the narrowest `AGENTS.md` that covers it: a repository's, a workspace's, or your global `~/AGENTS.md`.
 5. A scheduled sweep runs the script over the last 7 days of sessions, so it also finds costs that are small in each session. A sweep only proposes rules. A person reviews them before they reach a rule file.
+6. Each retrospective scores the rules it acted on: `Helped` when a rule saved a step, `Misled` when it was out of date or wrong. Environment facts in rules carry `(verified <date>; until <condition>)`. A rule that misled, whose condition is met, whose references are gone, or that has not been used for 60 days is rewritten, retired, or moved to a lesson file. The ledger row keeps the reason. The weekly sweep checks these signals and proposes the changes.
 
 Skills are loaded on demand; rules are loaded every session. That is why `agent-rsi` is a skill, while the rules it writes go into `AGENTS.md`.
 
