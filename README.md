@@ -61,6 +61,7 @@ For agents without hooks, add a line to your global rules file (`~/AGENTS.md`, `
 3. A failure produces a regression test and, where warranted, an ADR, a postmortem, or a shared lesson in `agent-docs/lessons/`.
 4. When a count reaches 2, the lesson becomes a rule in the narrowest `AGENTS.md` that covers it: a repository's, a workspace's, or your global `~/AGENTS.md`.
 5. A scheduled sweep runs the script over the last 7 days of sessions, so it also finds costs that are small in each session. A sweep only proposes rules. A person reviews them before they reach a rule file.
+6. Each retrospective scores the rules it acted on: `Helped` when a rule saved a step, `Misled` when it was out of date or wrong. Environment facts in rules carry `(verified <date>; until <condition>)`. A rule that misled, whose condition is met, whose references are gone, or that has not been used for 60 days is rewritten, retired, or moved to a lesson file. The ledger row keeps the reason. The weekly sweep checks these signals and proposes the changes.
 
 Skills are loaded on demand; rules are loaded every session. That is why `agent-rsi` is a skill, while the rules it writes go into `AGENTS.md`.
 

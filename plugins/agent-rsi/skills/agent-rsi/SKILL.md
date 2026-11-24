@@ -90,6 +90,13 @@ Log a time sink found in step 1 with type `slow`, for example "each remote exec 
 
 Also log successes that saved real time ("ran the tests locally before pushing and skipped a CI round trip") with type `method`. Methods are promoted the same way as mistakes.
 
+Then score the rules that shaped this task. Only score rules you acted on; do not audit every loaded rule.
+
+- A promoted rule changed what you did and saved a step or a mistake: add 1 to `Helped` and set `Last applied` to today.
+- A rule sent you the wrong way: it named a file, command, version, host, or limit that is no longer true; it disagreed with the code; or the user corrected you because you followed it. Add 1 to `Misled`, put what was wrong in `Evidence`, and fix or retire the rule now (see "Retire stale rules").
+- If the rule has no ledger row, add one of type `method` with `Count` 2 and `Status` `promoted → <file>#<section>`, then score it.
+- Rows written before these columns existed have fewer cells. Fill the missing cells when you score the row; an empty cell counts as 0 or never.
+
 ### 3. Turn the failure into artifacts
 
 Produce only what the failure warrants:
@@ -112,9 +119,28 @@ How to write the rule:
 - Make it checkable: "Run `make test` before pushing", not "Be careful with tests".
 - Do not duplicate. If a rule already covered it and the mistake happened anyway, the rule is unclear or in the wrong place: rewrite or move it instead of adding another.
 - If a test, lint, or CI check can enforce it, add that check and mention it in the rule.
+- When a rule states a fact about the environment rather than a way of working (a host, cluster, version, release bug, service limit, quota, or network condition), end it with `(verified YYYY-MM-DD)`. When the fact has a known end, add the condition: `(verified 2026-03-02; until tool > 1.4.0)`. A session that observes the fact again updates the date.
 - Set the ledger row's `Status` to `promoted → <file>#<section>`.
 
-Rule files load into every session, so keep each one under about 150 lines. Before adding to a file at that size, merge overlapping rules and delete rules whose subject no longer exists.
+Rule files load into every session, so keep each one under about 150 lines. Before adding to a file at that size, run "Retire stale rules" on it and merge overlapping rules.
+
+### Retire stale rules
+
+A rule that is no longer true costs more than a missing rule: agents follow a rule file even when the code in front of them disagrees. Retire a rule when any of these holds:
+
+| Signal | Action |
+| --- | --- |
+| `Misled` ≥ 2, or `Misled` ≥ 1 and `Misled` ≥ `Helped` | Rewrite the rule so it would not have misled, or retire it |
+| Its `until` condition is met (the release shipped, the issue closed, the host is gone) | Retire it, or reduce it to what is still true |
+| A file, command, flag, skill, or host it names no longer exists | Fix the reference, or retire it if its subject is gone |
+| An environment fact is more than 30 days past `verified` | Check it with one command; update the date or the fact |
+| A newer rule or user statement contradicts it | Keep the newer one; retire the older |
+| No `Last applied` or `Last seen` in the last 60 days | Propose moving it to a lesson file; it stays findable but stops loading in every session |
+
+- Check the signal before you act: read the issue, run the command, open the file. A stale-looking rule can be a guard that simply never fired.
+- Remove the rule text from the rule file. Do not leave "obsolete" notes there; rule files load into every session.
+- Keep the ledger row and record why: `Status` becomes `retired YYYY-MM-DD: <reason>`, `superseded → L-NNNN`, or `demoted → <lesson file>`. A later session that meets the same problem finds the history there.
+- When you move a rule to a lesson file, list that file in `agent-docs/README.md`.
 
 ### Sweep across sessions
 
@@ -123,7 +149,8 @@ A cost that is small in each session can be large in total. Run a sweep on a sch
 1. Run `session-stats.py --since 7d`. Add `--json` to read the numbers in a script.
 2. For each finding, look for a ledger row with the same root cause. On a match, increment `Count` once per sweep, not once per session. Otherwise add a row.
 3. A sweep runs without the user. It does not edit rule files. For each row that reaches the promotion threshold, write the proposed rule and set `Status` to `proposed → <file>#<section>`. Put the change in a pull request where the rule file is in a repository; otherwise list it for the user.
-4. Report the top findings, the ledger changes, and the proposals in one short message.
+4. Check each rule file in scope against "Retire stale rules": the ledger counters, every `until` condition, every `verified` date older than 30 days, and the names each rule references. Verify each signal with one command or read. Propose each retirement, rewrite, or move the same way as a new rule, with its evidence, and set the row's `Status` to `proposed retire → <reason>`. Do not edit the rule file.
+5. Report the top findings, the ledger changes, the proposed rules, and the proposed retirements in one short message.
 
 ### 5. Report
 
