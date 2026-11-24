@@ -54,6 +54,12 @@ hook 需要 `python3`。同一段新工作只会提醒一次。只读的轮次�
 - After any task that changed code, config, pull requests, or deployments, run the `agent-rsi` skill.
 ```
 
+不管有没有 hook，都再加上这一行。规则文件和眼前的代码冲突时，agent 约 90% 会照过期的规则做；这句话能反过来，并让 agent 报告不一致，`agent-rsi` 靠这个发现规则过期了（[arXiv 2610.30571](https://arxiv.org/abs/2610.30571)）：
+
+```markdown
+- When a repository's documentation and its existing code disagree, follow the conventions used in the existing code, and in your final reply point out each inconsistency you found between the documentation and the code.
+```
+
 ## agent-rsi 怎么工作
 
 1. 任务结束后，agent 对 session 记录（Claude Code 或 Codex）运行 `scripts/session-stats.py`。脚本统计工具时间花在哪里：慢的命令类别、每次都慢的调用、重复执行的命令、失败和轮询循环。然后 agent 找出出错或太慢的根因。
